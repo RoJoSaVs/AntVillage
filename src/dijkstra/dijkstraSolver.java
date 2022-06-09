@@ -4,16 +4,18 @@ import graphHandler.Graph;
 import graphHandler.Node;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 
 public class dijkstraSolver {
-    private LinkedList<DijkstraNode> open;
-    private LinkedList<DijkstraNode> close;
-    private Graph graph;
+    private final LinkedList<DijkstraNode> open;
+    private final LinkedList<DijkstraNode> close;
+    private final Graph graph;
 
     public dijkstraSolver(Node startNode, Graph grid) {
-        this.open = new LinkedList<DijkstraNode>();
-        this.close = new LinkedList<DijkstraNode>();
+        this.open = new LinkedList<>();
+        this.close = new LinkedList<>();
         this.open.add(new DijkstraNode(startNode, startNode.getId(), 0));
         this.graph = grid;
     }
@@ -41,30 +43,39 @@ public class dijkstraSolver {
                     int currentPathWeight = currentPathValues.get(i) + currentDijkstraNode.getAggregatedWeight();
 
                     DijkstraNode newDijkstraNode = null;
+                    boolean opened = false;
 
                     for(DijkstraNode dijkstraNode : this.open){
                         if(dijkstraNode.getDataNode().getId() == currentId){
                             newDijkstraNode = dijkstraNode;
+                            opened = true;
                             break;
                         }
                     }
 
-                    if(newDijkstraNode.equals(null)) {
+                    if(newDijkstraNode == null) {
                                 newDijkstraNode = new DijkstraNode(
                                 this.graph.getNodes().get(currentId),
                                 currentDijkstraNode.getSourceID(),
                                 currentPathWeight
                         );
                     }
+
+                    if(newDijkstraNode.getAggregatedWeight() > currentPathWeight){
+                        newDijkstraNode.setAggregatedWeight(currentPathWeight);
+                        newDijkstraNode.setSourceID(currentId);
+                    }
+
+                    if(!opened){
+                        this.open.add(newDijkstraNode);
+                    }
+
+                    this.open.sort(Comparator.comparingInt(DijkstraNode::getAggregatedWeight));
                 }
             }
-        }
-    }
 
-    public void sortNodes(){
-        LinkedList<DijkstraNode> newOpenList = new LinkedList<DijkstraNode>();
-        for(DijkstraNode dijkstraNode : this.open){
-
+            this.close.add(currentDijkstraNode);
+            this.open.pop();
         }
     }
 }
